@@ -1,11 +1,16 @@
 import arcade
-
 import settings
 
 
 class Character(arcade.Sprite):
+    pass
+
+
+
+class Platform(arcade.Sprite):
     def __init__(self, filename, x, y):
-        super().__init__(filename,x,y)
+        super().__init__(filename, x, y)
+
 
 
 class Chapter2View(arcade.View):
@@ -14,33 +19,17 @@ class Chapter2View(arcade.View):
         self.menu = True
         self.in_game = False
 
-        self.character = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", 64, 128)
+        self.list_of_platforms = arcade.SpriteList()
 
-        #Lists to keep track of sprites
-        self.wall_list = None
-        self.platform_land_list = None
-        self.player_list = None
+        self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", center_x=100, center_y=100)
 
-        #Variable that holds player sprite
-        self.player_sprite = None
-
+        self.physics = arcade.PhysicsEnginePlatformer(self.player, self.list_of_platforms, 2)   
 
     def on_show(self):
         arcade.set_background_color(arcade.color.WHITE)
 
     def setup(self):
-        "Set up game in this section. Call function to restart game."
-        #Make sprite lists
-        self.wall_list = arcade.SpriteList()
-        self.platform_land_list = arcade.SpriteList()
-        self.player_list = arcade.SpriteList()
-
-        #Put player at following coordinates
-        player_image = ":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png"
-        self.player_sprite = arcade.Sprite(player_image)
-        self.player_sprite.center_x = 64
-        self.player_sprite.center_y = 128
-        self.player_list.append(self.player_sprite)   
+        pass 
 
     def on_draw(self):
         arcade.start_render()
@@ -54,12 +43,11 @@ class Chapter2View(arcade.View):
 
         
         if self.in_game is True:
-            #self.player_list.draw()
-
-            self.character.draw()
+            self.player.draw()
 
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
+
         if key == arcade.key.ENTER:
             self.menu = False
             self.in_game = True

@@ -4,13 +4,16 @@ import os
 import arcade
 
 class Box(arcade.Sprite):
-	def __init__(self, x, y):
+	def __init__(self, center_x, center_y):
 		super().__init__(filename="sprites/test_wall_sprite.png", center_x=x, center_y=y)
 
-		self.half_sprite = 10
-		self.x = self.center_x - self.half_sprite
-		self.y = self.center_y - self.half_sprite
-		self.compact_list = [x, y]
+		self.left_x = None
+		self.bottom_y = None
+
+		self.right_x = None
+		self.top_y = None
+		
+		self.compact_list = [self.center_x, self.center_y]
 
 class Session_manager:
 	def __init__(self):
@@ -18,7 +21,8 @@ class Session_manager:
 		self.block_size = 20
 		self.half_block = self.block_size / 2 
 
-		self.points = []
+		self.blocks = arcade.SpriteList()
+
 		if len(sys.argv) == 5 and sys.argv[1] == "n": # main.py n filename.csv w h
 			
 			self.WIDTH = int(sys.argv[3])
@@ -53,7 +57,7 @@ class Session_manager:
 			for row in csv_reader:
 				
 				if count != 0:
-					self.points.append(Box(float(row[0]), float(row[1])))
+					self.blocks.append(Box(float(row[0]), float(row[1])))
 
 				else:
 					count += 1
@@ -65,30 +69,40 @@ class Session_manager:
 
 				file_writer.writerow([self.WIDTH, self.HEIGHT])
 
-				for box in self.points:
+				for box in self.blocks:
 					file_writer.writerow(box.compact_list)
-
 
 	def add_new_box(self, x, y):
 		
-		true_x = x - (x % self.block_size)
-		true_y = y - (y % self.block_size)
+		left_x = x - (x % self.block_size)
+		bottom_y = y - (y % self.block_size)
 
-		center_x = true_x + self.half_block
-		center_y = true_y + self.half_block
+		x = left_x + self.half_block
+		y = bottom_y + self.half_block
 
-		self.points.append(Box(center_x, center_y))
+		b = Box(center_x=x, center_y=y)
+
+		b.left_x = left_x 
+		b.right_x =  left_x + self.block_size
+		b.bottom_y = bottom_y
+		b.top_y = bottom_y + self.block_size
+
+		self.blocks.append(b)
 	
 	def rm_box(self, x, y):
 		
-		count = 0
-		for box in self.points:
-			if  x > box.x and x < (box.x + self.block_size):
-				if y > box.y and y < (box.y + self.block_size):
-					cd Code
-					del self.points[count]
+		found = True
 
-			count += 1
+		while found:
+			
+			for box in self.blocks:
+				if box.left_x < x and box.right_x > x:
+					if box.bottom_y < y and box.top_y > y:
+						self.blocks.remove(box)
+						break
+				
+			else:
+				found = False
 
 def draw_grid(width, height, spacing):
 
@@ -99,11 +113,7 @@ def draw_grid(width, height, spacing):
 		arcade.draw_line(0, c, width, c, arcade.color.BLACK_LEATHER_JACKET, 2) 
 
 session = Session_manager()
-
-print(session.WIDTH, session.HEIGHT)
-
 window = arcade.open_window(session.WIDTH, session.HEIGHT, "Map Builder")
-
 
 def setup():
 	arcade.set_background_color(arcade.color.WHITE)
@@ -117,10 +127,7 @@ def update(delta_time):
 def on_draw():
 	arcade.start_render()
 	
-	draw_grid(session.WIDTH, session.HEIGHT, session.block_size)
-
-	for box in session.points:
-		box.draw()
+	session.blocks.draw()
 
 @window.event
 def on_key_press(key, modifiers):

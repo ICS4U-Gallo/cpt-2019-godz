@@ -7,9 +7,27 @@ class Character(arcade.Sprite):
 
 
 
-class Platform(arcade.Sprite):
-    def __init__(self, filename, x, y):
-        super().__init__(filename, x, y)
+class Platforms:
+    def __init__(self):
+        self.all = arcade.SpriteList()
+        self.resource_pack = ":resources:/images/tiles/stoneMid.png"
+        self.sprite_scaling = 0.2
+
+        self.sprite_size_w = 128
+        self.sprite_size_h = 128
+
+    def recursive_platforms(self, y, range_list):
+    # [0, 100] range of platform    
+        s = arcade.Sprite(filename=self.resource_pack, center_x= range_list[0], center_y=y, scale=self.sprite_scaling)
+        self.all.append(s)
+
+        range_list[0] += self.sprite_size_w * self.sprite_scaling
+
+        if range_list[0] >= range_list[1]:
+            pass
+        else:
+            self.recursive_platforms(y, range_list )
+
 
 
 
@@ -19,11 +37,15 @@ class Chapter2View(arcade.View):
         self.menu = True
         self.in_game = False
 
-        self.list_of_platforms = arcade.SpriteList()
+        self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", center_x=100, center_y=100, scale=0.4)
 
-        self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", center_x=100, center_y=100)
+        self.platform_manager = Platforms()
 
-        self.physics = arcade.PhysicsEnginePlatformer(self.player, self.list_of_platforms, 2)   
+        self.platform_manager.recursive_platforms(y=50, range_list=[0,150])
+        self.platform_manager.recursive_platforms(y=200, range_list=[500,1000])
+
+        self.physics = arcade.PhysicsEnginePlatformer(self.player, self.platform_manager.all)   
+        self.physics.gravity_constant = 2
 
     def on_show(self):
         arcade.set_background_color(arcade.color.WHITE)
@@ -44,6 +66,7 @@ class Chapter2View(arcade.View):
         
         if self.in_game is True:
             self.player.draw()
+            self.platform_manager.all.draw()
 
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
@@ -51,6 +74,9 @@ class Chapter2View(arcade.View):
         if key == arcade.key.ENTER:
             self.menu = False
             self.in_game = True
+
+    def on_pdate(self, delta_time):
+        self.physics.update()
 
 
 if __name__ == "__main__":

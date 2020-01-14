@@ -6,6 +6,7 @@ import csv
 
 PLAYER_SPEED = 15.0
 PLAYER_JUMP = 20.0
+PLAYER_FRICTION = 0.8
 PLAYER_GRAVITY = 1.0
 
 class Point:
@@ -91,6 +92,11 @@ class Chapter1View(arcade.View):
 
         self.player = Player(starting_x=300 ,starting_y=50)
 
+        self.key_pressed = {
+            arcade.key.A: False,
+            arcade.key.D: False,
+            arcade.key.SPACE: False}
+
         self.platform_manager = Platform_manager("level1.csv")
 
         # Initializing a physics engine instance.
@@ -108,27 +114,25 @@ class Chapter1View(arcade.View):
         
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
-
-        if key == arcade.key.D:
-            self.player._set_change_x(PLAYER_SPEED)
-
-        if key == arcade.key.A:
-            self.player._set_change_x(-PLAYER_SPEED)
-
-        if key == arcade.key.SPACE and self.physics_engine.jumps_since_ground <= 2:
-            self.physics_engine.jump(PLAYER_JUMP)
+        self.key_pressed[key] = True
 
     def on_key_release(self, key, modifiers):
-        
-        if key == arcade.key.A:
-            self.player._set_change_x(0)
-
-        if key == arcade.key.D:
-            self.player._set_change_x(0)
+        self.key_pressed[key] = False
 
     def on_update(self, delta_time:float):
         
         self.physics_engine.update()
+
+        if self.key_pressed[arcade.key.A]:
+            self.player._set_change_x(-PLAYER_SPEED)
+
+        elif self.key_pressed[arcade.key.D]:
+            self.player._set_change_x(PLAYER_SPEED)
+
+        if self.key_pressed[arcade.key.SPACE]:
+            self.physics_engine.jump(PLAYER_JUMP)
+
+        self.player._set_change_x(self.player._get_change_x() * PLAYER_FRICTION)
 
         # Adjusting the viewport (camera)
         x, x1, y, y1 = self.player.screen_location()

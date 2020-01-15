@@ -1,6 +1,9 @@
 import arcade
 import settings
 
+player_speed = 7
+player_jump = 15
+player_friction = 0.8
 
 class Character(arcade.Sprite):
     pass
@@ -16,8 +19,7 @@ class Platforms:
         self.sprite_size_w = 128
         self.sprite_size_h = 128
 
-    def recursive_platforms(self, y, range_list):
-    # [0, 100] range of platform    
+    def recursive_platforms(self, y, range_list):   
         s = arcade.Sprite(filename=self.resource_pack, center_x= range_list[0], center_y=y, scale=self.sprite_scaling)
         self.all.append(s)
 
@@ -37,15 +39,29 @@ class Chapter2View(arcade.View):
         self.menu = True
         self.in_game = False
 
+        #Player image
+        self.character_height = 128*0.4
         self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", center_x=100, center_y=100, scale=0.4)
 
+        #Platforms 
         self.platform_manager = Platforms()
 
         self.platform_manager.recursive_platforms(y=50, range_list=[0,150])
         self.platform_manager.recursive_platforms(y=200, range_list=[500,1000])
+        self.platform_manager.recursive_platforms(y=100, range_list=[170, 400])
 
+        #Player movement
+        self.key_pressed = {
+            arcade.key.W: False,
+            arcade.key.A: False,
+            arcade.key.D: False, arcade.key.ENTER: False}  
+        
+
+        #Physics
         self.physics = arcade.PhysicsEnginePlatformer(self.player, self.platform_manager.all)   
-        self.physics.gravity_constant = 2
+        self.physics.gravity_constant = 1
+
+
 
     def on_show(self):
         arcade.set_background_color(arcade.color.WHITE)
@@ -59,11 +75,13 @@ class Chapter2View(arcade.View):
              arcade.draw_text("Chapter 2", settings.WIDTH/2, settings.HEIGHT/2,
                          arcade.color.BLACK, font_size=30, anchor_x="center")
              arcade.draw_text("""You're in highschool now, avoid the projectiles
-                        \nby using the arrows to move around""", settings.WIDTH/2,
-                         settings.HEIGHT/4, arcade.color.BLACK, font_size=15,
-                         anchor_x="center")
-
-        
+                        \n           by using W,A,D to move around""", 
+                         settings.WIDTH/2, settings.HEIGHT/3, arcade.color.BLACK, 
+                         font_size=15, anchor_x="center")
+             arcade.draw_text("Hit ENTER to continue", settings.WIDTH/2, 
+                          settings.HEIGHT/3.6, arcade.color.BLACK, font_size=15,
+                          anchor_x="center")
+                
         if self.in_game is True:
             self.player.draw()
             self.platform_manager.all.draw()
@@ -71,12 +89,39 @@ class Chapter2View(arcade.View):
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
 
-        if key == arcade.key.ENTER:
-            self.menu = False
-            self.in_game = True
+        self.key_pressed[key] = True
+    
+    def on_key_release(self, key, modifiers):
+        self.key_pressed[key] = False
+        
 
     def on_update(self, delta_time):
         self.physics.update()
+
+        #Player movement with keys
+        if self.key_pressed[arcade.key.ENTER] == True:
+            self.menu = False
+            self.in_game = True
+        
+        if self.key_pressed[arcade.key.A]:
+            self.player._set_change_x(-player_speed)
+
+        if self.key_pressed[arcade.key.D]:
+            self.player._set_change_x(player_speed)
+        
+        if self.key_pressed[arcade.key.W] and self.physics.can_jump(5):
+            self.physics.jump(player_jump)
+
+        
+        self.player._set_change_x(self.player._get_change_x()*player_friction)
+
+        #Falls off map
+        if self.player.center_y <= -50:
+            self.player.center_x = 100
+            self.player.center_y = 100
+
+        
+
 
 
 if __name__ == "__main__":

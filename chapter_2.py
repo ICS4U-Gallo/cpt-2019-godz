@@ -75,7 +75,7 @@ class Chapter2View(arcade.View):
             self.menu = False
             self.in_game = True
 
-    def on_pdate(self, delta_time):
+    def on_update(self, delta_time):
         self.physics.update()
 
 

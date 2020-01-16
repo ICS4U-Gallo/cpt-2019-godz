@@ -10,8 +10,8 @@ player_friction = 0.8
 player_scaling = 0.4
 
 #Bullet constants
-bullet_scaling=0.5
-bullet_speed = 1
+bullet_scaling = 0.8
+bullet_speed = 1000
 
 
 class Character(arcade.Sprite):
@@ -57,7 +57,7 @@ class Bullet(arcade.Sprite):
         y = random.randint(self.view_pointer.camera_position[2], self.view_pointer.camera_position[3])
 
         super().__init__(filename=filename, center_x=x, center_y=y, scale=bullet_scaling)
-        self._set_change_x = -bullet_speed
+        self._set_change_x(-bullet_speed)
 
 
 class Chapter2View(arcade.View):
@@ -76,7 +76,7 @@ class Chapter2View(arcade.View):
         self.platform_manager.recursive_platforms(y=50, range_list=[0,150])
         self.platform_manager.recursive_platforms(y=200, range_list=[500,1000])
         self.platform_manager.recursive_platforms(y=100, range_list=[170, 400])
-        self.platform_manager.recursive_platforms(y=300, range_list=[1200, 1800])
+        self.platform_manager.recursive_platforms(y=300, range_list=[1100, 1800])
 
         #Player movement
         self.key_pressed = {
@@ -120,7 +120,7 @@ class Chapter2View(arcade.View):
             self.platform_manager.all.draw()
 
             for bullet in self.bullet_list:
-                self.bullet.draw()
+                bullet.draw()
 
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
@@ -165,8 +165,11 @@ class Chapter2View(arcade.View):
             self.camera_position = [x, x1, y, y1]
 
         #Bullet spawning
-        if time.gmtime() % 1 == 0 and self.in_game is True:
+        if round(time.time(), 1) % 20 == 0 and self.in_game is True:
             self.bullet_list.append(Bullet(self.bullet_sprite, self))
+
+        if len(self.bullet_list) > 0:
+            print(self.bullet_list[0].get_change_x())
 
         
 if __name__ == "__main__":

@@ -75,9 +75,9 @@ class JoeView3(arcade.View):
     randY=random.randrange(-4, 5)
     if randY==0:
         randY=random.randrange(-4, 5)
-    fish.change_x = randX
-    fish.change_y = randY
-    return fish
+        fish.change_x = randX
+        fish.change_y = randY
+        return fish
     
     def get_timeleft(self):
         """
@@ -130,9 +130,9 @@ class JoeView3(arcade.View):
             self.display_caught_fish(self._caught_list)
             arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
             if self.get_timeleft() > 0 and self._stopGame == False:
-            arcade.draw_text("Time Left: " + str(self.get_timeleft()) + " seconds", 300, 10, arcade.color.WHITE, font_size=16, anchor_x="center")
+                arcade.draw_text("Time Left: " + str(self.get_timeleft()) + " seconds", 300, 10, arcade.color.WHITE, font_size=16, anchor_x="center")
             else:
-            self._stopGame = True
+                self._stopGame = True
             if len(self._fish_list) != 0:
                 arcade.draw_text("Game Over", 400, 300, arcade.color.RED, font_size = 40, anchor_x="center")
             if len(self._fish_list) == 0:
@@ -194,7 +194,7 @@ class JoeView3(arcade.View):
         self.all_sprites_list.append(self.player_sprite)
         
         
-    if __name__ == "__main__":
+if __name__ == "__main__":
     """This section of code will allow you to run your View
     independently from the main.py file and its Director.
     You can ignore this whole section. Keep it at the bottom

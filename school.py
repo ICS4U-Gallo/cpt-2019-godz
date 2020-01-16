@@ -21,13 +21,13 @@ class Fish(arcade.Sprite):
         self.change_x = 0
         self.change_y = 0
         self._id = id
-  
+    
     def get_id(self) -> int:
         return self._id
-  
+    
     def set_id(self, value: int):
         self._id = value
-      
+        
     def update(self):
         # Move the fish
         self.center_x += self.change_x
@@ -58,23 +58,23 @@ class JoeView3(arcade.View):
         self._startTime = time.time()
         self._stopGame = False
         self._caught_list = []
-
+    
     def make_fish(self, id: int):
         """
-    Function to make a new, random fish with id and location and vector
-    """
-    fish = Fish("Fish.png", 0.05, id)
+        Function to make a new, random fish with id and location and vector
+        """
+        fish = Fish("Fish.png", 0.05, id)
         
-    # Starting position of the fish.
-    fish.center_x  = random.randrange(10,settings.WIDTH)
-    fish.center_y  = random.randrange(10,settings.HEIGHT)
-    # Speed and direction of fish
-    randX=random.randrange(-4, 5)
-    if randX==0:
+        # Starting position of the fish.
+        fish.center_x  = random.randrange(10,settings.WIDTH)
+        fish.center_y  = random.randrange(10,settings.HEIGHT)
+        # Speed and direction of fish
         randX=random.randrange(-4, 5)
-    randY=random.randrange(-4, 5)
-    if randY==0:
+        if randX==0:
+            randX=random.randrange(-4, 5)
         randY=random.randrange(-4, 5)
+        if randY==0:
+            randY=random.randrange(-4, 5)
         fish.change_x = randX
         fish.change_y = randY
         return fish
@@ -130,11 +130,11 @@ class JoeView3(arcade.View):
             self.display_caught_fish(self._caught_list)
             arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
             if self.get_timeleft() > 0 and self._stopGame == False:
-                arcade.draw_text("Time Left: " + str(self.get_timeleft()) + " seconds", 300, 10, arcade.color.WHITE, font_size=16, anchor_x="center")
+                arcade.draw_text("Time Left: " + str(self.get_timeleft()) + " seconds", 300, 10, arcade.color.WHITE, font_size= 16, anchor_x="center")
             else:
                 self._stopGame = True
-            if len(self._fish_list) != 0:
-                arcade.draw_text("Game Over", 400, 300, arcade.color.RED, font_size = 40, anchor_x="center")
+                if len(self._fish_list) != 0:
+                    arcade.draw_text("Game Over", 400, 300, arcade.color.RED, font_size= 40, anchor_x="center")
             if len(self._fish_list) == 0:
                 self._stopGame = True
                 arcade.draw_text("You Win", 400, 300, arcade.color.GREEN, font_size = 40, anchor_x="center")
@@ -208,3 +208,4 @@ if __name__ == "__main__":
     my_view.director = FakeDirector(close_on_next_view=True)
     window.show_view(my_view)
     arcade.run()
+

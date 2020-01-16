@@ -1,15 +1,34 @@
 import arcade
 import settings
+import random
+import time
 
+#Player constants
 player_speed = 7
 player_jump = 15
 player_friction = 0.8
+player_scaling = 0.4
+
+#Bullet constants
+bullet_scaling=0.5
+bullet_speed = 1
+
 
 class Character(arcade.Sprite):
-    pass
+    def __init__(self, filename, x, y):
+        super().__init__(filename=filename, center_x=x, center_y=y, scale=player_scaling)
+        self.camera_zoom = 500
+        self.camera_height = 40
 
+    def update_map_view(self):
+        x = self.center_x - self.camera_zoom
+        x1 = self.center_x + self.camera_zoom
+        y= self.camera_height - self.camera_zoom
+        y1 = self.camera_height + self.camera_zoom
 
+        return x, x1, y, y1
 
+        
 class Platforms:
     def __init__(self):
         self.all = arcade.SpriteList()
@@ -31,6 +50,14 @@ class Platforms:
             self.recursive_platforms(y, range_list )
 
 
+class Bullet(arcade.Sprite):
+    def __init__(self, filename, view_pointer):
+        self.view_pointer = view_pointer
+        x = self.view_pointer.camera_position[1] + 15
+        y = random.randint(self.view_pointer.camera_position[2], self.view_pointer.camera_position[3])
+
+        super().__init__(filename=filename, center_x=x, center_y=y, scale=bullet_scaling)
+        self._set_change_x = -bullet_speed
 
 
 class Chapter2View(arcade.View):
@@ -41,7 +68,7 @@ class Chapter2View(arcade.View):
 
         #Player image
         self.character_height = 128*0.4
-        self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", center_x=100, center_y=100, scale=0.4)
+        self.player = Character(":resources:/images/animated_characters/male_adventurer/maleAdventurer_idle.png", x=100, y=100)
 
         #Platforms 
         self.platform_manager = Platforms()
@@ -49,6 +76,7 @@ class Chapter2View(arcade.View):
         self.platform_manager.recursive_platforms(y=50, range_list=[0,150])
         self.platform_manager.recursive_platforms(y=200, range_list=[500,1000])
         self.platform_manager.recursive_platforms(y=100, range_list=[170, 400])
+        self.platform_manager.recursive_platforms(y=300, range_list=[1200, 1800])
 
         #Player movement
         self.key_pressed = {
@@ -59,9 +87,14 @@ class Chapter2View(arcade.View):
 
         #Physics
         self.physics = arcade.PhysicsEnginePlatformer(self.player, self.platform_manager.all)   
-        self.physics.gravity_constant = 1
+        self.physics.gravity_constant = 0.7
 
+        #Camera position
+        self.camera_position = None
 
+        #Bullet list
+        self.bullet_list = arcade.SpriteList()
+        self.bullet_sprite = ":resources:images/space_shooter/laserBlue01.png"
 
     def on_show(self):
         arcade.set_background_color(arcade.color.WHITE)
@@ -85,6 +118,9 @@ class Chapter2View(arcade.View):
         if self.in_game is True:
             self.player.draw()
             self.platform_manager.all.draw()
+
+            for bullet in self.bullet_list:
+                self.bullet.draw()
 
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
@@ -116,14 +152,23 @@ class Chapter2View(arcade.View):
         self.player._set_change_x(self.player._get_change_x()*player_friction)
 
         #Falls off map
-        if self.player.center_y <= -50:
+        if self.player.center_y <= -500:
             self.player.center_x = 100
             self.player.center_y = 100
 
+        #Map scrolling
+        if self.in_game is True:
+            x, x1, y, y1 = self.player.update_map_view()
+
+            arcade.set_viewport(x, x1, y, y1)
+
+            self.camera_position = [x, x1, y, y1]
+
+        #Bullet spawning
+        if time.gmtime() % 1 == 0 and self.in_game is True:
+            self.bullet_list.append(Bullet(self.bullet_sprite, self))
+
         
-
-
-
 if __name__ == "__main__":
     """This section of code will allow you to run your View
     independently from the main.py file and its Director.
@@ -143,4 +188,3 @@ if __name__ == "__main__":
     my_view.setup()
     window.show_view(my_view)
     arcade.run()
-

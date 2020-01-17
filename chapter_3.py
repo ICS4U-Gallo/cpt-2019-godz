@@ -19,6 +19,7 @@ class Chapter3View(arcade.View):
         self.shooter_speed_x = 0.5
         self.goalie = arcade.Sprite("maleAdventurer_idle.png", scale=1.3)
         self.goalie_speed_x = 1
+        self.ball = arcade.Sprite()
         
         self.timer_start = 0
 
@@ -37,10 +38,14 @@ class Chapter3View(arcade.View):
         self.shot_state = 0
         self._start_time = time.time()
         self._stop_game = False
+        self.change_x
+        self.change_y
 
     def get_timeleft(self):
         end_time = time.time()
         return time_game - int((end_time - self._start_time))
+    
+
 
 
 
@@ -63,9 +68,6 @@ class Chapter3View(arcade.View):
                          arcade.color.BLACK, font_size=30, anchor_x="center")
         
         
-            
-
-        
         if self.in_game is True:
 
             arcade.draw_texture_rectangle(settings.WIDTH/2, settings.HEIGHT/2, settings.WIDTH, settings.HEIGHT, self.background)
@@ -77,7 +79,12 @@ class Chapter3View(arcade.View):
     
             self.shooter.draw()
 
-            arcade.draw_text("Time Left: " + str(self.get_timeleft()) + "seconds", 300, 10, arcade.color.BLACK, font_size = 30, anchor_x = "center")
+            if self.get_timeleft() > 0 and self._stop_game == False:
+                arcade.draw_text("Time Left: " + str(self.get_timeleft()) + " seconds", 300, 10, arcade.color.BLACK, font_size= 25, anchor_x="center")
+            else:
+                self._stop_game = True
+                arcade.draw_text("Game Over", 400, 300, arcade.color.WHITE, font_size= 30, anchor_x="center")
+
     def on_update(self, delta_time):
         
 

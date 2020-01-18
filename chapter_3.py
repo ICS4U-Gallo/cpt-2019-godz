@@ -6,7 +6,7 @@ import time
 time_game = 60
 start_time = time.time()
 end_time = time.time()
-
+FRICTION = 0.5
 
 class Chapter3View(arcade.View):
     def __init__(self):
@@ -19,11 +19,11 @@ class Chapter3View(arcade.View):
         self.shooter_speed_x = 0.5
         self.goalie = arcade.Sprite("maleAdventurer_idle.png", scale=1.3)
         self.goalie_speed_x = 1
-        self.ball = arcade.Sprite()
+        self.ball = arcade.Sprite("soccer_ball.png", scale=0.1)
         
         self.timer_start = 0
 
-        self.ball_center_x = 400
+        self.ball_center_x = 200
         self.ball_center_y = 100
         self.goalie.center_x = 400
         self.goalie.center_y = 275
@@ -38,8 +38,9 @@ class Chapter3View(arcade.View):
         self.shot_state = 0
         self._start_time = time.time()
         self._stop_game = False
-        self.change_x
-        self.change_y
+        self.ball_speed_x = 2
+        self.ball_speed_y = 2
+        
 
     def get_timeleft(self):
         end_time = time.time()
@@ -63,7 +64,6 @@ class Chapter3View(arcade.View):
             arcade.draw_text("CLICK ENTER TO START", settings.WIDTH/2 - 50, settings.HEIGHT/2 - 50, 
                          arcade.color.BLUE, font_size=15, anchor_x="center")
         
-        if self.menu is True:
             arcade.draw_text("Penalty Game", settings.WIDTH/2, settings.HEIGHT/2,
                          arcade.color.BLACK, font_size=30, anchor_x="center")
         
@@ -71,8 +71,10 @@ class Chapter3View(arcade.View):
         if self.in_game is True:
 
             arcade.draw_texture_rectangle(settings.WIDTH/2, settings.HEIGHT/2, settings.WIDTH, settings.HEIGHT, self.background)
-            arcade.draw_circle_filled(self.ball_center_x, self.ball_center_y, 25, arcade.color.BLUE)
+            #arcade.draw_circle_filled(int(self.ball_center_x), int(self.ball_center_y), 25, arcade.color.BLUE)
             self.goalie.draw()
+            self.ball.draw()
+            
 
             arcade.draw_line(self.ball_center_x, self.ball_center_y, self.end_ball_x, self.end_ball_y, arcade.color.WHITE)
         
@@ -122,6 +124,14 @@ class Chapter3View(arcade.View):
             self.radar_speed_y *= -1
         
         self.end_ball_y += self.radar_speed_y
+
+        if self.shot_state == 2 and not (self.ball_center_x <= self.end_ball_x and self.ball_center_y <= self.end_ball_y):
+            self.ball_center_x += self.ball_speed_x 
+            self.ball_center_y += self.ball_speed_y
+            print(self.ball_center_x, self.ball_center_y)
+            self.ball_speed_y *= FRICTION
+            self.ball_speed_x *= FRICTION
+
         
 
     def on_key_press(self, key, modifiers):
@@ -138,10 +148,14 @@ class Chapter3View(arcade.View):
             self.radar_speed_x = 0
             self.radar_speed_y = 2
             self.shot_state = 1
+            self.ball_speed_x = (self.end_ball_x - self.ball_center_x) * 2
+            print(self.ball_speed_x)
         
         elif key == arcade.key.SPACE and self.shot_state == 1:
             self.radar_speed_y = 0
             self.shot_state = 2
+            self.ball_speed_y = (self.end_ball_y - self.ball_center_y) * 2
+            print(self.ball_speed_y)
             
         
 if __name__ == "__main__":

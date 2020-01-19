@@ -4,14 +4,15 @@ import os
 import arcade
 
 class Box(arcade.Sprite):
-	def __init__(self, center_x, center_y):
+	sprite_dimension = 20
+	def __init__(self, x, y):
 		super().__init__(filename="sprites/test_wall_sprite.png", center_x=x, center_y=y)
 
-		self.left_x = None
-		self.bottom_y = None
+		self.left_x = self.center_x - (self.sprite_dimension / 2)
+		self.bottom_y = self.center_y - (self.sprite_dimension / 2)
 
-		self.right_x = None
-		self.top_y = None
+		self.right_x = self.center_x + (self.sprite_dimension / 2)
+		self.top_y = self.center_y + (self.sprite_dimension / 2)
 		
 		self.compact_list = [self.center_x, self.center_y]
 
@@ -22,7 +23,8 @@ class Session_manager:
 		self.half_block = self.block_size / 2 
 
 		self.blocks = arcade.SpriteList()
-
+		
+		self.goal = None
 		if len(sys.argv) == 5 and sys.argv[1] == "n": # main.py n filename.csv w h
 			
 			self.WIDTH = int(sys.argv[3])
@@ -36,10 +38,7 @@ class Session_manager:
 			self.load_prev_session()
 
 		else:
-			raise ValueError("""
-			Run script by (cpt_map_tool.py n/l) \"n\" for new map, \"l\" for laoding a previous map
-			creating a new map requires file.py n width height
-			loading an old map requires file.py l csv_file.csv """)
+			raise ValueError("""Needs map_tool.py l filename.csv --or-- map_tool.py n filename.csv file_width file_height """)
 
 		self.unsaved_changes = False
 
@@ -47,27 +46,37 @@ class Session_manager:
 		
 		with open(self.complete_dir) as csv_file:
 			csv_reader = csv.reader(csv_file, delimiter=",")
-
-			for row in csv_reader:
-				self.WIDTH, self.HEIGHT = int(row[0]), int(row[1])
-				break
-
+			
 			count = 0
 
 			for row in csv_reader:
-				
-				if count != 0:
+
+				if count == 0:
+					self.WIDTH, self.HEIGHT = int(row[0]), int(row[1])
+
+				elif count == 1:	
+					self.goal = arcade.Sprite(filename='sprites/test_goal_sprite.png',
+								center_x=int(row[0]),
+								center_y=int(row[1]))
+
+				elif count != 0:
 					self.blocks.append(Box(float(row[0]), float(row[1])))
 
-				else:
-					count += 1
+				count += 1
 
 	def save_current_sesssion(self):
 
+			try:
+				os.remove(self.complete_dir)
+			
+			except:
+				pass
+			
 			with open(self.complete_dir, "w") as csv_file:
 				file_writer = csv.writer(csv_file, delimiter=",")
 
 				file_writer.writerow([self.WIDTH, self.HEIGHT])
+				file_writer.writerow([self.goal.center_x, self.goal.center_y])
 
 				for box in self.blocks:
 					file_writer.writerow(box.compact_list)
@@ -80,7 +89,7 @@ class Session_manager:
 		x = left_x + self.half_block
 		y = bottom_y + self.half_block
 
-		b = Box(center_x=x, center_y=y)
+		b = Box(x=x, y=y)
 
 		b.left_x = left_x 
 		b.right_x =  left_x + self.block_size
@@ -104,6 +113,11 @@ class Session_manager:
 			else:
 				found = False
 
+	def add_goal(self, x, y):
+		self.goal = arcade.Sprite(filename='sprites/test_goal_sprite.png',
+								center_x=x,
+								center_y=y)
+
 def draw_grid(width, height, spacing):
 
 	for r in range(0, width, spacing):
@@ -126,8 +140,10 @@ def update(delta_time):
 @window.event
 def on_draw():
 	arcade.start_render()
-	
+	draw_grid(session.WIDTH, session.HEIGHT, 20)
 	session.blocks.draw()
+	if session.goal != None:
+		session.goal.draw()
 
 @window.event
 def on_key_press(key, modifiers):
@@ -147,6 +163,9 @@ def on_mouse_press(x, y, button, modifiers):
 	
 	elif button == arcade.MOUSE_BUTTON_RIGHT:
 		session.rm_box(x,y)
+
+	elif button == arcade.MOUSE_BUTTON_MIDDLE:
+		session.add_goal(x, y)
 
 if __name__ == '__main__':
 	setup()

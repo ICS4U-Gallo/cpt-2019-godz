@@ -11,7 +11,7 @@ player_scaling = 0.4
 
 #Bullet constants
 bullet_scaling = 0.8
-bullet_speed = 1000
+bullet_speed = 10
 
 
 class Character(arcade.Sprite):
@@ -57,8 +57,7 @@ class Bullet(arcade.Sprite):
         y = random.randint(self.view_pointer.camera_position[2], self.view_pointer.camera_position[3])
 
         super().__init__(filename=filename, center_x=x, center_y=y, scale=bullet_scaling)
-        self._set_change_x(-bullet_speed)
-
+        
 
 class Chapter2View(arcade.View):
     def __init__(self):
@@ -84,7 +83,6 @@ class Chapter2View(arcade.View):
             arcade.key.A: False,
             arcade.key.D: False, arcade.key.ENTER: False}  
         
-
         #Physics
         self.physics = arcade.PhysicsEnginePlatformer(self.player, self.platform_manager.all)   
         self.physics.gravity_constant = 0.7
@@ -119,8 +117,9 @@ class Chapter2View(arcade.View):
             self.player.draw()
             self.platform_manager.all.draw()
 
-            for bullet in self.bullet_list:
-                bullet.draw()
+            #for bullet in self.bullet_list:
+                #bullet.draw()
+            self.bullet_list.draw()
 
     def on_key_press(self, key, modifiers):
         #self.director.next_view()
@@ -130,7 +129,6 @@ class Chapter2View(arcade.View):
     def on_key_release(self, key, modifiers):
         self.key_pressed[key] = False
         
-
     def on_update(self, delta_time):
         self.physics.update()
 
@@ -148,7 +146,6 @@ class Chapter2View(arcade.View):
         if self.key_pressed[arcade.key.W] and self.physics.can_jump(5):
             self.physics.jump(player_jump)
 
-        
         self.player._set_change_x(self.player._get_change_x()*player_friction)
 
         #Falls off map
@@ -165,11 +162,14 @@ class Chapter2View(arcade.View):
             self.camera_position = [x, x1, y, y1]
 
         #Bullet spawning
-        if round(time.time(), 1) % 20 == 0 and self.in_game is True:
+        for bullet in self.bullet_list:
+            bullet.change_x = -bullet_speed
+        if round(time.time(), 1) % 10 == 0 and self.in_game is True:
             self.bullet_list.append(Bullet(self.bullet_sprite, self))
+                
 
         if len(self.bullet_list) > 0:
-            print(self.bullet_list[0].get_change_x())
+            print(self.bullet_list[0]._get_change_x())
 
         
 if __name__ == "__main__":

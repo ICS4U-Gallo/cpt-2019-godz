@@ -208,7 +208,10 @@ class ViewScore(arcade.View):
     def on_draw(self):
         """Render the screen."""
         arcade.start_render()
+<<<<<<< HEAD
         
+=======
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
         score = points
         arcade.draw_text(f"Your Score: {score}",
                          settings.WIDTH / 2, settings.HEIGHT / 2,
@@ -219,9 +222,13 @@ class ViewScore(arcade.View):
         arcade.set_background_color(arcade.color.BONE)
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
+<<<<<<< HEAD
         
         score = points
         # Add the time to highscore list
+=======
+        score = points
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
         with open("scores.json", "r") as f:
             data = json.load(f)
 
@@ -247,13 +254,17 @@ class Highscores(arcade.View):
     def on_draw(cls):
         """Render the screen."""
         arcade.start_render()
+<<<<<<< HEAD
         
+=======
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
         score = points
         height_decrease = 120
         sorted_list = []
         with open("scores.json", "r") as f:
             data = json.load(f)
 
+<<<<<<< HEAD
         # Displaying the scores from shortest to longest scores
         for values in data.values():
             sorted_list.append(values)
@@ -261,6 +272,16 @@ class Highscores(arcade.View):
         arcade.draw_text(f"Highscores: \n", settings.WIDTH / 2,
                          settings.HEIGHT - 200,
                          arcade.color.TEAL, font_size=18, anchor_x="center")
+=======
+        # Displaying the scores from shortest to longest times
+        for values in data.values():
+            sorted_list.append(values)
+            sorted_list2 = merge_sort(sorted_list)
+        arcade.draw_text(f"Highscores: \n", settings.WIDTH / 2,
+                         settings.HEIGHT - 200,
+                         arcade.color.TEAL, font_size=18, anchor_x="center")
+
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
         # Only displays 5 scores
         for i in reversed(range(0, 5)):
             arcade.draw_text(f"{i + 1}: {sorted_list2[i]} \n",
@@ -281,7 +302,11 @@ class Highscores(arcade.View):
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         self.window.close()
 
+<<<<<<< HEAD
 '''
+=======
+
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
 def merge_sort(numbers: List[int]) -> List[int]:
     """Sorts the items in a list
     Args:
@@ -310,7 +335,11 @@ def merge_sort(numbers: List[int]) -> List[int]:
     while left_marker < len(left_side) and right_marker < len(right_side):
         # If left value less than right value, add right value to sorted
         # increase left marker
+<<<<<<< HEAD
         if (left_side[left_marker]) > (right_side[right_marker]):
+=======
+        if left_side[left_marker] > right_side[right_marker]:
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
             sorted_list.append(left_side[left_marker])
             left_marker += 1
         # If right value less than left value, add left value to sorted
@@ -330,6 +359,7 @@ def merge_sort(numbers: List[int]) -> List[int]:
 
     # Return the sorted list
     return sorted_list
+<<<<<<< HEAD
     '''
 
 def bubble_sort(numbers: List[int]) -> List[int]:
@@ -354,6 +384,8 @@ def bubble_sort(numbers: List[int]) -> List[int]:
 
     # return the sorted list
     return numbers
+=======
+>>>>>>> 61308ea16d56a533faa01852d3018118de3ad72b
 
 
 if __name__ == "__main__":

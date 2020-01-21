@@ -127,6 +127,9 @@ class Chapter3View(arcade.View):  # Chapter3View class
 
             arcade.draw_text(f"Hello {self.name}", 400, 100, 
                              arcade.color.BLACK, 24)
+            arcade.draw_text("Click the screen with mouse to quit and see your score", 
+                             100, 450, arcade.color.BLACK, 
+                             15)
 
         if self.in_game is True:
             # When it is in the game, draw these characters and images

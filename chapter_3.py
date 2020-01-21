@@ -1,4 +1,4 @@
-mport arcade
+import arcade
 import settings
 from datetime import datetime
 from typing import List

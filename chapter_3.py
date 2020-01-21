@@ -350,7 +350,8 @@ class Highscores(arcade.View):
         self.window.close()
 
 def merge_sort(numbers: List[int]) -> List[int]:
-    """Sorts the items in a list
+    """Sorts the scores of players in a list from greatest to least
+        also uses recursion
     Args:
         numbers: list of integers
     Returns:

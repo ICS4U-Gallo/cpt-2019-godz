@@ -1,21 +1,16 @@
 import arcade
 import settings
 from datetime import datetime
-from typing import List
 import time
 import json
 
-time_game = 10
+time_game = 60
 start_time = time.time()
 end_time = time.time()
-
-
-sorted_list = []
-
+FRICTION = 0.5
 
 
 class Chapter3View(arcade.View):
-        
     def __init__(self):
         super().__init__()
         self.menu = True
@@ -79,7 +74,7 @@ class Chapter3View(arcade.View):
             arcade.set_background_color(arcade.color.WHITE)
 
         elif self.in_game == True:
-            arcade.set_background(self.background)
+            arcade.set_background(self.timebackground)
 
     def on_draw(self):
         arcade.start_render()
@@ -112,8 +107,10 @@ class Chapter3View(arcade.View):
                                  font_size=25, anchor_x="center")
             else:
                 self._stop_game = True
-                self.in_game = True
+                self.in_game = False
+                self.menu = True
                 arcade.draw_text("Game Over", 400, 300, arcade.color.WHITE, font_size=30, anchor_x="center")
+
             arcade.draw_text(str(self.points), 20, 20, arcade.color.WHITE, font_size=40, anchor_x="center")
 
     def on_update(self, delta_time):
@@ -133,13 +130,12 @@ class Chapter3View(arcade.View):
             if self.ball.center_x > (settings.WIDTH / 2) - 150 and self.ball.center_x < (settings.WIDTH / 2) + 150:
                 if self.ball.center_y > (settings.HEIGHT / 2) - 100 and self.ball.center_y < 600:
                     self.points += 1
+
                     self.reset_game()
 
         else:
             self.reset_game()
 
-        global points
-        points = self.points
         print(self.points)
 
         if self.shooter.center_x >= self.ball.center_x and self.shooter.center_y >= self.ball.center_y:
@@ -196,164 +192,19 @@ class Chapter3View(arcade.View):
 
         elif self.menu is True and key == arcade.key.BACKSPACE and self.submit_name is False:
             self.name = self.name[:-1]
-    
-    def on_mouse_press(self, _x, _y, _button, _modifiers):
-        view_score = ViewScore()
-        self.window.show_view(view_score)
 
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.ENTER:
+            with open('scores.json', 'r') as f:
+                scores = json.loads(f.read())
 
-class ViewScore(arcade.View):
-    """Shows player's time after completing the maze"""
+            scores.setdefault(key,[]).append(self.name)
 
-    def on_draw(self):
-        """Render the screen."""
-        arcade.start_render()
-        
-        score = points
-        arcade.draw_text(f"Your Score: {score}",
-                         settings.WIDTH / 2, settings.HEIGHT / 2,
-                         arcade.color.TEAL, font_size=10, anchor_x="center")
+            with open("scores.json", "w") as f:
+                json.dump(scores, f)
 
-    def on_show(self):
-        # Set the background color
-        arcade.set_background_color(arcade.color.BONE)
-
-    def on_mouse_press(self, _x, _y, _button, _modifiers):
-        
-        score = points
-        # Add the time to highscore list
-        with open("scores.json", "r") as f:
-            data = json.load(f)
-
-        data[f"score {len(data) + 1}"] = score
-
-        with open("scores.json", 'w') as f:
-            json.dump(data, f)
-
-        # Transition to highscore view
-        highscores = Highscores()
-        self.window.show_view(highscores)
-
-
-class Highscores(arcade.View):
-    """Shows a list of scores"""
-
-    @classmethod
-    def on_show(cls):
-        # Set the background color
-        arcade.set_background_color(arcade.color.BONE)
-
-    @classmethod
-    def on_draw(cls):
-        """Render the screen."""
-        arcade.start_render()
-        
-        score = points
-        height_decrease = 120
-        sorted_list = []
-        with open("scores.json", "r") as f:
-            data = json.load(f)
-
-        # Displaying the scores from shortest to longest scores
-        for values in data.values():
-            sorted_list.append(values)
-            sorted_list2 = bubble_sort(sorted_list) 
-        arcade.draw_text(f"Highscores: \n", settings.WIDTH / 2,
-                         settings.HEIGHT - 200,
-                         arcade.color.TEAL, font_size=18, anchor_x="center")
-        # Only displays 5 scores
-        for i in reversed(range(0, 5)):
-            arcade.draw_text(f"{i + 1}: {sorted_list2[i]} \n",
-                             settings.WIDTH / 2,
-                             settings.HEIGHT - 200 - height_decrease,
-                             arcade.color.TEAL, font_size=18,
-                             anchor_x="center")
-            height_decrease -= 20
-
-        # Display text
-        arcade.draw_text(f"Your Score: {score}", settings.WIDTH / 2,
-                         settings.HEIGHT / 2 - 100,
-                         arcade.color.TEAL, font_size=18, anchor_x="center")
-        arcade.draw_text("Click to continue", settings.WIDTH / 2,
-                         settings.HEIGHT / 2 - 250,
-                         arcade.color.TEAL, font_size=20, anchor_x="center")
-
-    def on_mouse_press(self, _x, _y, _button, _modifiers):
-        self.window.close()
-
-'''
-def merge_sort(numbers: List[int]) -> List[int]:
-    """Sorts the items in a list
-    Args:
-        numbers: list of integers
-    Returns:
-        the list of integers from smallest to largest value
-    """
-    # merge sort
-    # Base case
-    if len(numbers) == 1:
-        return numbers
-
-    midpoint = len(numbers) // 2
-
-    # Two recursive steps
-    # Mergesort left
-    left_side = merge_sort(numbers[:midpoint])
-    # Mergesort right
-    right_side = merge_sort(numbers[midpoint:])
-    # Merge the two together
-    sorted_list = []
-
-    # Loop through both lists with two markers
-    left_marker = 0
-    right_marker = 0
-    while left_marker < len(left_side) and right_marker < len(right_side):
-        # If left value less than right value, add right value to sorted
-        # increase left marker
-        if (left_side[left_marker]) > (right_side[right_marker]):
-            sorted_list.append(left_side[left_marker])
-            left_marker += 1
-        # If right value less than left value, add left value to sorted
-        # increase right marker
-        else:
-            sorted_list.append(right_side[right_marker])
-            right_marker += 1
-
-    # Create a while loop to gather the rest of the values from either list
-    while right_marker < len(right_side):
-        sorted_list.append(right_side[right_marker])
-        right_marker += 1
-
-    while left_marker < len(left_side):
-        sorted_list.append(left_side[left_marker])
-        left_marker += 1
-
-    # Return the sorted list
-    return sorted_list
-    '''
-
-def bubble_sort(numbers: List[int]) -> List[int]:
-# optimization 1: if gone through without swapping, its sorted, stop looping
-    is_sorted = False
-
-    # optimization 2: each pass, the last element is always sorted, don't loop to it anymore.
-    times_through = 0
-
-    while not is_sorted:
-        is_sorted = True  # optimization 1
-        # loop through and compare two elements at a time
-        for i in range(len(numbers) - 1 - times_through):  # with optimization 2
-            a = numbers[i]
-            b = numbers[i+1]
-            # if the two elements are out of order, swap them
-            if a > b:
-                numbers[i] = b
-                numbers[i+1] = a
-                is_sorted = False  # optimization 1
-        times_through += 1  # optimization 2
-
-    # return the sorted list
-    return numbers
+            #with open('scores.json', 'w', encoding='utf-8') as f:
+             #   json.dump(scores, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":

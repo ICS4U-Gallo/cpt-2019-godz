@@ -5,7 +5,7 @@ from typing import List
 import time
 import json
 
-time_game = 10
+time_game = 60
 start_time = time.time()
 end_time = time.time()
 
